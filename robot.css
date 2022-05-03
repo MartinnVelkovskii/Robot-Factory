@@ -53,7 +53,7 @@
   border-right: 28px solid #fefce0;
   position: absolute;
   top: -33px;
-  right: -30px;
+  right: -30.2px;
 }
 
 .content-wrapper {
@@ -62,36 +62,38 @@
   padding: 40px 0 40px 20px;
 }
 
-.content-wrapper .left-block,
+.content-wrapper .left-side,
 .content-wrapper .right-block {
   background-color: white;
 }
 
 .left-side {
   width: 30%;
-  display: flex;
+  height: 350px;
+  border: 1px solid black;
+  position: relative;
 }
 
 .robot {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
+  position: relative;
+  margin-top: 20px;
+  align-items: center;
 }
 
 .md-parts {
   display: flex;
-  flex-direction: row;
+position: relative;
+height: 110px;
 }
 
 .robot-head {
-  display: flex;
   width: 70px;
   height: 70px;
   border: 1px solid black;
   border-radius: 50%;
   margin: 5px 0 5px 0px;
-  align-items: center;
   position: relative;
 }
 
@@ -123,16 +125,26 @@
   position: absolute;
   bottom: 13px;
   left: 18px;
+  transform: rotateX(180deg);
 }
 
-.robot-body {
-  color: orangered;
+.female-robot-body {
   border-bottom: 110px solid;
   border-left: 25px solid transparent;
   border-right: 25px solid transparent;
   height: 0;
   width: 70px;
-  transform: rotateX(180deg);
+  z-index: 3;
+}
+
+.male-robot-body {
+  border-bottom: 110px solid;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  height: 0;
+  width: 70px;
+  transform: rotateX(180deg); 
+  z-index: 3;
 }
 
 .arms {
@@ -142,18 +154,23 @@
   margin-top: 8px;
   background-color: lightgrey;
   border-radius: 5px;
+  position: relative;
 }
 
 .down-parts {
   display: flex;
+  position: relative;
+  height: 60px;
 }
 
 .legs {
   width: 16px;
   height: 60px;
   border: 1px solid black;
-  margin: 0px 17px 0px 17px;
+  position: relative;
+  margin: 0  17px;
 }
+
 
 .robot-name {
   text-align: center;
@@ -166,11 +183,6 @@
   flex-direction: column;
   width: 70%;
   margin-left: 25px;
-}
-
-.left-block {
-  border: 1px solid black;
-  width: 100%;
 }
 
 .right-block {
@@ -267,4 +279,106 @@
 
 .empty-section {
   height: 150px;
+}
+.error-message{
+  color: red;
+  display: block;
+  padding-top: 5px;
+}
+
+.mouth.talk{
+  animation-name: talk;
+  animation-duration: 1s;
+  animation-iteration-count: 10;
+
+}
+@keyframes talk {
+  0%   {height: 5px;}
+  50%  {height: 0;}
+}
+
+.legs.jump{
+  animation-name: jump;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes jump {
+  0%   {top: -30px;}
+  50%  {top: 0;}
+
+}
+
+.right-eye.blink{
+  animation-name: blink;
+  transform-origin: 50%;
+  animation: blink 2s infinite;
+}
+
+
+@keyframes blink {
+  0%, 100% {
+      transform: scale(1, .05);
+  }
+  5%,
+  95% {
+      transform: scale(1, 1);
+  }
+}
+
+
+.bubble {
+  position: relative;
+  width: 220px;
+  text-align: center;
+  line-height: 1.2em;
+  margin: 20px auto;
+  background-color: #fff;
+  border: 1px solid #333;
+  border-radius: 100px;
+  font-family: sans-serif;
+  padding: 10px;
+  font-size: large;
+}
+
+.speech:after {
+  left: 31px;
+  bottom: -48px;
+  border: 25px solid;
+  border-color: #fff transparent transparent #fff;
+}
+
+.bubble:before, .bubble:after {
+  content: ' ';
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.speech:before {
+  left: 30px;
+  bottom: -50px;
+  border: 25px solid;
+  border-color: #333 transparent transparent #333;
+}
+
+.bubble-position{
+  position: absolute;
+  left: 7rem;
+  top: -4rem;
+}
+
+.d-none{
+  display: none;
+}
+
+.buttons-holder{
+  text-align: center;
+  margin: 2rem;
+}
+
+.buttons-holder button{
+  padding: 0.5rem;
+  margin: 0.5rem;
+  border-radius: 3px;
 }
