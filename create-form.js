@@ -1,6 +1,60 @@
 const form = document.querySelector("#create-form");
 form.addEventListener("submit", createRobot);
 
+let robots = [];
+let activeIndex = 0;
+let messages = [];
+
+function showCreatedRobotsSection() {
+  if (robots.length > 0) {
+    let innerHTML = `
+    <div class="robots-found-style">${robots.length} robots found</div>  
+  <table class="styled-table">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Color</th>
+    <th>Options</th>
+  </tr>
+  </thead>
+`;
+    robots.forEach((robot, index) => {
+      innerHTML += createTableRow(robot, index);
+    });
+    innerHTML += "</table>";
+    document.querySelector("#e-section").innerHTML = innerHTML;
+  } else {
+    document.querySelector("#e-section").innerHTML = `No robots created yet`;
+  }
+}
+
+function createTableRow(robot, index) {
+  const colorBlock = `<div class="table-color" style="background-color:${robot.color};"></div>`;
+  console.log(index);
+  return `
+<tbody> <tr> <td> <a href="#" onclick="onLinkClicked(${index})"> ${
+    robot.name !== "" ? robot.name : ""
+  } </a> </td>
+<td>${robot.type !== "" ? robot.type : ""}</td>
+<td>${robot.color !== "" ? colorBlock : ""}</td>
+<td>${optionCheck(robot)}</td> </tr> </tbody>`;
+}
+
+function onLinkClicked(index) {
+  activeIndex = index;
+  createNewRobotSection(robots[activeIndex]);
+}
+
+function optionCheck(robot) {
+  let checkedOptions = [];
+  robot.options.option1 === true ? checkedOptions.push("can jump") : "";
+  robot.options.option2 === true ? checkedOptions.push("can talk") : "";
+  robot.options.option3 === true ? checkedOptions.push("can blink") : "";
+
+  return checkedOptions.join(",");
+}
+
 function createNewRobotSection(robot) {
   document.querySelector("#robot-slide").innerHTML = ` 
     <section id="slide-1" class="factory-section">
@@ -49,40 +103,60 @@ function createNewRobotSection(robot) {
             <div class="robot-name">${robot.name}</div>
           </div>
         <div class="right-side">
-          <div class="right-block first">
-            <p>
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-              Voluptatibus impedit quas numquam illum. Nam quia, porro
-              cupiditate quisquam amet doloremque consectetur nisi temporibus,
-              exercitationem quasi iste Lorem, ipsum dolor sit amet consectetur
-              adipisicing elit. Deleniti cupiditate quaerat excepturi rerum
-              nostrum sunt debitis alias illo perspiciatis ut. Perspiciatis ipsa
-              excepturi distinctio nam omnis? Ipsum eaque vitae sed.
-            </p>
-          </div>
-          <div class="right-block second">
-            <p>
-              <em>Lorem</em>, ipsum dolor sit amet consectetur adipisicing elit.
-              Officia asperiores consequatur blanditiis exercitationem
-              consequuntur quis quidem modi dolore provident
-              necessitatibus,aliquid id obcaecati repudiandae?
-            </p>
-          </div>
-          <div class="right-block third">
-            <img
-              class="good-luck-image"
-              src="https://media.istockphoto.com/vectors/-vector-id505920740"
-            />
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Officia
-              asperiores consequatur blanditiis
-            </p>
-          </div>
+        <div class="message-label"> <label for="message">Send message:</label>
+        <input class="message-input-style" type="text" id="message"> </div>
+        <div class="message-send-button-container"><button onclick="onSendMessageClicked()" class="message-send-button">Send</button></div>
+        <div class="last-message-text-style"> <div class="hr-style"> <hr> </div><div class="last-messages-style">Last Messages </div> <div class="hr-style"><hr> </div> </div>
+        <div class="message-section" id="messagesSection">
+        ${getMessagesHtml(messages, robot)}
+        </div>
         </div>
       </div>
     </section>
     `;
 }
+
+function getMessagesHtml(messages, robot) {
+  let finalHtml = "";
+  filteredMessages = messages
+    .filter((m) => m.date > robot.createdDate)
+    .sort((a, b) => b.date - a.date)
+    .forEach((message) => (finalHtml += generateMessageHtml(message)));
+
+  return finalHtml;
+}
+
+function generateMessageHtml(message) {
+  if(message.text != ""){return `<div><span class="message-name-style" style="color:${message.robotColor}">${message.robotName}</span> ${message.time}</div>
+  <div class="message-text-style">${message.text}</div>`}
+  else{
+    return ""
+  };
+}
+
+function onSendMessageClicked() {
+  const robot = robots[activeIndex];
+  const now = new Date();
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  let messageSent = document.querySelector("#message").value;
+  let newMessage = {
+    text: messageSent,
+    time: time,
+    date: Date.now(),
+    robotName: robot.name,
+    robotColor: robot.color,
+  };
+  messages.push(newMessage);
+  addNewMessage(newMessage);
+}
+
+function addNewMessage(message) {
+  let messageHtml = generateMessageHtml(message);
+  let messagesSection = document.querySelector("#messagesSection");
+  let currentMessagesHtml = messagesSection.innerHTML;
+  messagesSection.innerHTML = messageHtml + currentMessagesHtml;
+}
+
 function canTalk(talkOptionClicked, isPhraseEmpty) {
   return talkOptionClicked === true && isPhraseEmpty !== "";
 }
@@ -92,9 +166,6 @@ function onCanTalkCheckboxChange() {
   const textArea = form.querySelector("#robot-comments-textarea");
   textArea.disabled = !checkbox.checked;
 }
-
-let robots = [];
-let activeIndex = 0;
 
 function createRobot(event) {
   let error = false;
@@ -141,6 +212,7 @@ function createRobot(event) {
         option2,
         option3,
       },
+      createdDate: Date.now(),
     };
     robots.push(robot);
     activeIndex = robots.length - 1;
