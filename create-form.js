@@ -1,6 +1,8 @@
 const form = document.querySelector("#create-form");
 form.addEventListener("submit", createRobot);
 
+let sendBtn = document.querySelector("#send-message");
+
 let robots = [];
 let activeIndex = 0;
 let messages = [];
@@ -105,7 +107,7 @@ function createNewRobotSection(robot) {
         <div class="right-side">
         <div class="message-label"> <label for="message">Send message:</label>
         <input class="message-input-style" type="text" id="message"> </div>
-        <div class="message-send-button-container"><button onclick="onSendMessageClicked()" class="message-send-button">Send</button></div>
+        <div class="message-send-button-container"><button id="send-message" onclick="onSendMessageClicked()" class="message-send-button">Send</button></div>
         <div class="last-message-text-style"> <div class="hr-style"> <hr> </div><div class="last-messages-style">Last Messages </div> <div class="hr-style"><hr> </div> </div>
         <div class="message-section" id="messagesSection">
         ${getMessagesHtml(messages, robot)}
@@ -148,7 +150,12 @@ function onSendMessageClicked() {
   };
   messages.push(newMessage);
   addNewMessage(newMessage);
+  inputReseted();
 }
+
+function inputReseted(){
+  document.querySelector("#message").value = ""
+  }
 
 function addNewMessage(message) {
   let messageHtml = generateMessageHtml(message);
@@ -168,6 +175,7 @@ function onCanTalkCheckboxChange() {
 }
 
 function createRobot(event) {
+  const textArea = form.querySelector("#robot-comments-textarea");
   let error = false;
   const name = form.querySelector("#robot-name-input");
   const selectType = form.querySelector("#robot-select-type");
@@ -201,6 +209,14 @@ function createRobot(event) {
     form.querySelector("#robot-color-validation").textContent = "";
   }
 
+  if (option2 == true & textArea.value == "") {
+    form.querySelector("#robot-phrase-validation").textContent =
+      "*This field is required!";
+    error = true;
+  } else {
+    form.querySelector("#robot-type-validation").textContent = "";
+  }
+
   if (!error) {
     let robot = {
       name: name.value,
@@ -222,6 +238,7 @@ function createRobot(event) {
   }
 
   event.preventDefault();
+  form.reset();
 }
 
 function createButtons() {
