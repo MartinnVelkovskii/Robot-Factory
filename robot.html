@@ -5,83 +5,132 @@
     <link rel="stylesheet" href="robot.css" />
   </head>
   <body class="padding-5px">
-  <header>
-    <div class="headContainer">
-      <h1 class="hStyle"">ROBOT FACTORY</h1>
-      <div class="logoStyle">
-        <a
-          href="https://www.playtech.com/careers/our-locations/bulgaria-office"
-          target="_blank"
-        >
-        <img
-          src="./images/playtech-logo.JPG"
-          alt=""
-          style="width: 100%"
-        />
-        </a>
-      </div>
-    </div>
-  </header>
-  <main>
-    <div id="robot-section">
-      <div id="robot-slide">
-
-      </div>
-    </div>
-    <section id="slide-2" class="create-robot-section">
-      <div class="create-robot-title">Create robot</div>
-      <hr/>
-      <form id="create-form" class="form-container" action="#">
-        <div class="input-fileds">
-          <div>
-            <label class="create-robot-label" for="robot-name-input">Name</label>
-            <input class="input-style" id="robot-name-input" placeholder="Robot name"/>
-            <label for="robot-name-input" id="robot-name-validation" class="error-message"></label>
-          </div>
-          <div>
-            <label class="create-robot-label" for="robot-select-type">Select type</label>
-            <select class="select-style" id="robot-select-type">
-              <option value="" selected disabled hidden></option>
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-            <label for="robot-type-input" id="robot-type-validation" class="error-message"></label>
-          </div>
-          <div>
-            <label class="create-robot-label" for="robot-select-color">Select color</label>
-            <input class="color-style" type="color" id="robot-select-color" value="#e96126"/>
-            <label for="robot-color-input" id="robot-color-validation" class="error-message"></label>
-          </div>
-          <div>
-            <label class="create-robot-label">Select options</label>
-            <div>
-              <input type="checkbox" id="robot-select-option-1" value="can-jump"/>
-              <label for="robot-select-option-1">can jump</label>
-            </div>
-            <div>
-              <input onChange="onCanTalkCheckboxChange()" type="checkbox" id="robot-select-option-2" value="can-talk"/>
-              <label for="robot-select-option-2">can talk</label>
-            </div>
-            <div>
-              <input type="checkbox" id="robot-select-option-3" value="can-blink"/>
-              <label for="robot-select-option-3">can blink</label>
-            </div>
-          </div>
-          <div>
-            <label class="create-robot-label" for="robot-comments-textarea">Phrase</label>
-            <textarea class="text-area-style" id="robot-comments-textarea" placeholder="text area" disabled></textarea>
-            <label for="create-robot-label" id="robot-phrase-validation" class="error-message"></label>
-          </div>
+    <header>
+      <div class="headContainer">
+        <h1 class="hStyle">ROBOT FACTORY</h1>
+        <div class="logoStyle">
+          <a
+            href="https://www.playtech.com/careers/our-locations/bulgaria-office"
+            target="_blank"
+          >
+            <img src="./images/playtech-logo.JPG" alt="" style="width: 100%" />
+          </a>
         </div>
-        <div class="buttons">
-          <button type="submit" class="first-button">Create</button>
-          <button onclick="showCreatedRobotsSection()" type="button" id="s-button" class="second-button">Show Created Robots</button>
-        </div>
-      </form>
-      <hr/>
-      <div id="e-section" class="empty-section"></div>
-    </section>
-  </main>
+      </div>
+    </header>
+    <main>
+      <div id="robot-section">
+        <div id="robot-slide"></div>
+      </div>
+      <section id="slide-2" class="create-robot-section">
+        <div class="create-robot-title">Create robot</div>
+        <hr />
+        <form id="create-form" class="form-container" action="#">
+          <div class="input-fileds">
+            <div>
+              <label class="create-robot-label" for="robot-name-input"
+                >Name</label
+              >
+              <input
+                class="input-style"
+                id="robot-name-input"
+                placeholder="Robot name"
+              />
+              <label
+                for="robot-name-input"
+                id="robot-name-validation"
+                class="error-message"
+              ></label>
+            </div>
+            <div>
+              <label class="create-robot-label" for="robot-select-type"
+                >Select type</label
+              >
+              <select class="select-style" id="robot-select-type">
+                <option value="" selected disabled hidden></option>
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+              <label
+                for="robot-type-input"
+                id="robot-type-validation"
+                class="error-message"
+              ></label>
+            </div>
+            <div>
+              <label class="create-robot-label" for="robot-select-color"
+                >Select color</label
+              >
+              <input
+                class="color-style"
+                type="color"
+                id="robot-select-color"
+                value="#e96126"
+              />
+              <label
+                for="robot-color-input"
+                id="robot-color-validation"
+                class="error-message"
+              ></label>
+            </div>
+            <div>
+              <label class="create-robot-label">Select options</label>
+              <div>
+                <input
+                  type="checkbox"
+                  id="robot-select-option-1"
+                  value="can-jump"
+                />
+                <label for="robot-select-option-1">can jump</label>
+              </div>
+              <div>
+                <input
+                  type="checkbox"
+                  id="robot-select-option-2"
+                  value="can-talk"
+                />
+                <label for="robot-select-option-2">can talk</label>
+              </div>
+              <div>
+                <input
+                  type="checkbox"
+                  id="robot-select-option-3"
+                  value="can-blink"
+                />
+                <label for="robot-select-option-3">can blink</label>
+              </div>
+            </div>
+            <div>
+              <label class="create-robot-label" for="robot-comments-textarea"
+                >Phrase</label
+              >
+              <textarea
+                class="text-area-style"
+                id="robot-comments-textarea"
+                placeholder="text area"
+                disabled
+              ></textarea>
+              <label
+                for="create-robot-label"
+                id="robot-phrase-validation"
+                class="error-message"
+              ></label>
+            </div>
+          </div>
+          <div class="buttons">
+            <button type="submit" class="first-button">Create</button>
+            <button type="button" id="s-button" class="second-button">
+              Show Created Robots
+            </button>
+            <button type="button" id="t-button" class="second-button">
+              Clear Robots
+            </button>
+          </div>
+        </form>
+        <hr />
+        <div id="e-section" class="empty-section"></div>
+      </section>
+    </main>
   </body>
-  <script src="./create-form.js"></script>
+  <script src="./built/create-form.js"></script>
 </html>
