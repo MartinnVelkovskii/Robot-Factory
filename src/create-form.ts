@@ -1,4 +1,9 @@
-const form = document.querySelector("#create-form") as HTMLFormElement;
+import Robot from "./Robot";
+import Message from "./Message";
+import ChatManager from "./ChatManager";
+
+//#region global variables
+const form = document.querySelector<HTMLFormElement>("#create-form");
 form.addEventListener("submit", createRobot);
 
 const canTalkCheckbox = document.querySelector("#robot-select-option-2");
@@ -10,44 +15,31 @@ showCreatedButton.addEventListener("click", showCreatedRobotsSection);
 const clearRobotsButton = document.querySelector("#t-button");
 clearRobotsButton.addEventListener("click", clearStorage);
 
-interface IRobot {
-  name: string;
-  color: string;
-  type: string;
-  phrase?: string;
-  options: {
-    option1: boolean;
-    option2: boolean;
-    option3: boolean;
-  };
-  createdDate: number;
+enum RobotType {
+  male = "Male",
+  female = "Female",
 }
 
-interface IMessage {
-  text: string;
-  time: string;
-  date: number;
-  robotName: string;
-  robotColor: string;
-}
+const jsonRobots: any = JSON.parse(localStorage.getItem("robots"));
+let robots: Robot[] = <Robot[]>jsonRobots || [];
 
-const jsonRobots = JSON.parse(localStorage.getItem("robots"));
-let robots: IRobot[] = <IRobot[]>jsonRobots || [];
+let activeIndex: number = 0;
 
-let activeIndex = 0;
+let chatManager: ChatManager = new ChatManager(
+  ChatManager.getLocalStorageMessages()
+);
+//#endregion
 
-const jsonMessages = JSON.parse(localStorage.getItem("messages"));
-let messages: IMessage[] = <IMessage[]>jsonMessages || [];
-
+//#region Robot Section
 if (robots.length) {
   robots.forEach((robot) => createNewRobotSection(robot));
   createButtons();
   robots.length != 1 && enableButtons();
 }
 
-function showCreatedRobotsSection() {
+function showCreatedRobotsSection(): void {
   if (robots.length > 0) {
-    let innerHTML = `
+    let innerHTML: string = `
     <div class="robots-found-style">${robots.length} robots found</div>  
   <table class="styled-table">
   <thead>
@@ -64,37 +56,28 @@ function showCreatedRobotsSection() {
     });
     innerHTML += "</table>";
     document.querySelector("#e-section").innerHTML = innerHTML;
+    robots.forEach((robot, index) => {
+      const linkClick = document.querySelector(`#link${index}`);
+      linkClick.addEventListener("click", () => onLinkClicked(index));
+    });
   } else {
     document.querySelector("#e-section").innerHTML = `No robots created yet`;
   }
 }
 
-function createTableRow(robot: IRobot, index: number) {
-  const colorBlock = `<div class="table-color" style="background-color:${robot.color};"></div>`;
+function createTableRow(robot: Robot, index: number): string {
+  const colorBlock: string = `<div class="table-color" style="background-color:${robot.color};"></div>`;
   return `
-<tbody> <tr> <td> <a href="#" onclick="onLinkClicked(${index})"> ${
+<tbody> <tr> <td> <a id="link${index}" href="#" "> ${
     robot.name !== "" ? robot.name : ""
   } </a> </td>
-<td>${robot.type !== "" ? robot.type : ""}</td>
+<td>${robot.type}</td>
 <td>${robot.color !== "" ? colorBlock : ""}</td>
 <td>${optionCheck(robot)}</td> </tr> </tbody>`;
 }
 
-function onLinkClicked(index: number) {
-  activeIndex = index;
-  createNewRobotSection(robots[activeIndex]);
-}
-
-function optionCheck(robot: IRobot) {
-  let checkedOptions = [];
-  robot.options.option1 === true ? checkedOptions.push("can jump") : "";
-  robot.options.option2 === true ? checkedOptions.push("can talk") : "";
-  robot.options.option3 === true ? checkedOptions.push("can blink") : "";
-
-  return checkedOptions.join(",");
-}
-
-function createNewRobotSection(robot: IRobot) {
+function createNewRobotSection(robot: Robot): void {
+  console.log(robot);
   document.querySelector("#robot-slide").innerHTML = ` 
     <section id="slide-1" class="factory-section">
       <div class="robot-title-box">
@@ -144,106 +127,45 @@ function createNewRobotSection(robot: IRobot) {
         <div class="right-side">
         <div class="message-label"> <label for="message">Send message:</label>
         <input class="message-input-style" type="text" id="message"> </div>
-        <div class="message-send-button-container"><button id="send-message" onclick="onSendMessageClicked()" class="message-send-button">Send</button></div>
+        <div class="message-send-button-container"><button id="send-message" class="message-send-button">Send</button></div>
+        <div class="message-send-button-container"><button id="reverse-message" class="message-send-button">Reverse</button></div>
         <div class="last-message-text-style"> <div class="hr-style"> <hr> </div><div class="last-messages-style">Last Messages </div> <div class="hr-style"><hr> </div> </div>
         <div class="message-section" id="messagesSection">
-        ${getMessagesHtml(messages, robot)}
+        ${chatManager.getMessagesHtml(robot)}
         </div>
         </div>
       </div>
     </section>
     `;
+  const sendMessage = document.querySelector("#send-message");
+  sendMessage.addEventListener("click", () => onSendMessageClicked());
+  const reverseMessages = document.querySelector("#reverse-message");
+  reverseMessages.addEventListener("click", () =>
+    chatManager.reverseMessages(robot)
+  );
 }
 
-function getMessagesHtml(messages: IMessage[], robot: IRobot) {
-  let finalHtml = "";
-  messages
-    .filter((m) => m.date > robot.createdDate)
-    .sort((a, b) => b.date - a.date)
-    .forEach((message) => (finalHtml += generateMessageHtml(message)));
-
-  return finalHtml;
-}
-
-function generateMessageHtml(message: IMessage) {
-  if (message.text != "") {
-    return `<div><span class="message-name-style" style="color:${message.robotColor}">${message.robotName}</span> ${message.time}</div>
-  <div class="message-text-style">${message.text}</div>`;
-  } else {
-    return "";
-  }
-}
-
-function onSendMessageClicked() {
-  const robot = robots[activeIndex];
-  const now = new Date();
-  const time = now.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  let messageSent = (document.querySelector("#message") as HTMLInputElement)
-    .value;
-  let newMessage: IMessage = {
-    text: messageSent,
-    time: time,
-    date: Date.now(),
-    robotName: robot.name,
-    robotColor: robot.color,
-  };
-  messages.push(newMessage);
-  localStorage.setItem("messages", JSON.stringify(messages));
-  addNewMessage(newMessage);
-  inputReseted();
-}
-
-function inputReseted() {
-  (document.querySelector("#message") as HTMLInputElement).value = "";
-}
-
-function addNewMessage(message: IMessage) {
-  let messageHtml = generateMessageHtml(message);
-  let messagesSection = document.querySelector("#messagesSection");
-  let currentMessagesHtml = messagesSection.innerHTML;
-  messagesSection.innerHTML = messageHtml + currentMessagesHtml;
-}
-
-function canTalk(talkOptionClicked: boolean, isPhraseEmpty: string) {
-  return talkOptionClicked === true && isPhraseEmpty !== "";
-}
-
-function onCanTalkCheckboxChange() {
-  const checkbox = form.querySelector(
-    "#robot-select-option-2"
-  ) as HTMLInputElement;
-  const textArea = form.querySelector(
+function createRobot(event: FormDataEvent): void {
+  const textArea = form.querySelector<HTMLInputElement>(
     "#robot-comments-textarea"
-  ) as HTMLInputElement;
-  textArea.disabled = !checkbox.checked;
-}
-
-function createRobot(event: FormDataEvent) {
-  const textArea = form.querySelector(
-    "#robot-comments-textarea"
-  ) as HTMLInputElement;
+  );
   let error = false;
-  const name = form.querySelector("#robot-name-input") as HTMLInputElement;
-  const selectType = form.querySelector(
-    "#robot-select-type"
-  ) as HTMLInputElement;
-  const selectColor = form.querySelector(
+  const name = form.querySelector<HTMLInputElement>("#robot-name-input");
+  const selectType = form.querySelector<HTMLInputElement>("#robot-select-type");
+  const selectColor = form.querySelector<HTMLInputElement>(
     "#robot-select-color"
-  ) as HTMLInputElement;
-  const phrase = form.querySelector(
+  );
+  const phrase: any = form.querySelector<HTMLInputElement>(
     "#robot-comments-textarea"
-  ) as HTMLInputElement;
-  let option1 = (
-    form.querySelector("#robot-select-option-1") as HTMLInputElement
+  );
+  let option1: boolean = form.querySelector<HTMLInputElement>(
+    "#robot-select-option-1"
   ).checked;
-  let option2 = (
-    form.querySelector("#robot-select-option-2") as HTMLInputElement
+  let option2: boolean = form.querySelector<HTMLInputElement>(
+    "#robot-select-option-2"
   ).checked;
-  let option3 = (
-    form.querySelector("#robot-select-option-3") as HTMLInputElement
+  let option3: boolean = form.querySelector<HTMLInputElement>(
+    "#robot-select-option-3"
   ).checked;
 
   if (!name.value || name.value == "") {
@@ -279,20 +201,17 @@ function createRobot(event: FormDataEvent) {
   }
 
   if (!error) {
-    let robot = {
-      name: name.value,
-      color: selectColor.value,
-      type: selectType.value,
-      phrase: phrase.value,
-      options: {
-        option1,
-        option2,
-        option3,
-      },
-      createdDate: Date.now(),
-    };
+    let robot: Robot = new Robot(
+      name.value,
+      selectColor.value,
+      getType(selectType.value),
+      phrase.value,
+      { option1, option2, option3 },
+      Date.now()
+    );
     robots.push(robot);
-    localStorage.setItem("robots", JSON.stringify(robots));
+    const robotJSON = robots.map((robot) => robot.toJsonString());
+    localStorage.setItem("robots", "[" + robotJSON.toString() + "]");
     activeIndex = robots.length - 1;
     createNewRobotSection(robot);
     activeIndex == 0 ? createButtons() : enableButtons();
@@ -302,14 +221,96 @@ function createRobot(event: FormDataEvent) {
   form.reset();
 }
 
-function createButtons() {
-  document.querySelector(
-    "#robot-section"
-  ).innerHTML += `<div class = "buttons-holder"> <button id="previous-button" class="" onclick="onPreviousClicked()" disabled> < Previous</button>
-  <button id="next-button" class="" onclick="onNextClicked()" disabled>Next ></button> </div>`;
+//helper functions
+
+function onLinkClicked(index: number): void {
+  activeIndex = index;
+  createNewRobotSection(robots[activeIndex]);
 }
 
-function onPreviousClicked() {
+function optionCheck(robot: Robot): string {
+  let checkedOptions = [];
+  robot.options.option1 === true ? checkedOptions.push("can jump") : "";
+  robot.options.option2 === true ? checkedOptions.push("can talk") : "";
+  robot.options.option3 === true ? checkedOptions.push("can blink") : "";
+
+  return checkedOptions.join(",");
+}
+
+function getType(robotType: string): RobotType {
+  if (robotType === "Male") {
+    return RobotType.male;
+  } else {
+    return RobotType.female;
+  }
+}
+
+//#endregion
+
+//#region Messeges
+
+function onSendMessageClicked(): void {
+  const robot: Robot = robots[activeIndex];
+  const now: Date = new Date();
+  const time: string = now.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  let messageSent: string =
+    document.querySelector<HTMLInputElement>("#message").value;
+  let newMessage = new Message(
+    messageSent,
+    time,
+    Date.now(),
+    robot.name,
+    robot.color
+  );
+
+  chatManager.addNewHTMLMessage(
+    newMessage,
+    document.querySelector("#messagesSection")
+  );
+  chatManager.addNewMessage(newMessage);
+  chatManager.saveToLocalStorage(newMessage);
+  inputReseted();
+}
+
+function inputReseted(): void {
+  document.querySelector<HTMLInputElement>("#message").value = "";
+}
+
+//#endregion
+
+//#region Talk
+function canTalk(talkOptionClicked: boolean, isPhraseEmpty: string): boolean {
+  return talkOptionClicked === true && isPhraseEmpty !== "";
+}
+
+function onCanTalkCheckboxChange(): void {
+  const checkbox = form.querySelector<HTMLInputElement>(
+    "#robot-select-option-2"
+  );
+  const textArea = form.querySelector<HTMLInputElement>(
+    "#robot-comments-textarea"
+  );
+  textArea.disabled = !checkbox.checked;
+}
+
+//#endregion
+
+//#region Buttons
+function createButtons(): void {
+  document.querySelector(
+    "#robot-section"
+  ).innerHTML += `<div class = "buttons-holder"> <button id="previous-button" class="" disabled> < Previous</button>
+  <button id="next-button" disabled>Next ></button> </div>`;
+  const previousButton = document.querySelector("#previous-button");
+  previousButton.addEventListener("click", onPreviousClicked);
+  const nextButton = document.querySelector("#next-button");
+  nextButton.addEventListener("click", onNextClicked);
+}
+
+function onPreviousClicked(): void {
   if (activeIndex - 1 < 0) {
     activeIndex = robots.length;
   }
@@ -317,7 +318,7 @@ function onPreviousClicked() {
   createNewRobotSection(robots[activeIndex]);
 }
 
-function onNextClicked() {
+function onNextClicked(): void {
   if (activeIndex + 1 > robots.length - 1) {
     activeIndex = -1;
   }
@@ -325,7 +326,7 @@ function onNextClicked() {
   createNewRobotSection(robots[activeIndex]);
 }
 
-function enableButtons() {
+function enableButtons(): void {
   const prevButton: HTMLButtonElement =
     document.querySelector("#previous-button");
   const nextButton: HTMLButtonElement = document.querySelector("#next-button");
@@ -333,6 +334,8 @@ function enableButtons() {
   nextButton.disabled = false;
 }
 
-function clearStorage(){
-    localStorage.clear();
+//#endregion
+
+function clearStorage(): void {
+  localStorage.clear();
 }
